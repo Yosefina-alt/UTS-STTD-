@@ -48,23 +48,41 @@ Ini otomatis menjadi *dependency graph* komunikasi antar proses.
 #  **Diagram Hubungan GraphQL dan Komunikasi Antar Proses**
 
 ```mermaid
-
-graph LR
-
-    A[Client (Web/Mobile)] -->|GraphQL_Query| B[GraphQL Server (Gateway/Resolver)]
-
-    B -->|IPC_REST| C[User Service]
-    B -->|IPC_gRPC| D[Product Service]
-    B -->|IPC_MQ| E[Order Service]
-
-    C -->|Return| B
-    D -->|Return| B
-    E -->|Return| B
-
-    B -->|Aggregated| A
+graph TD
+    %% GraphQL Layer and Clients
+    Client[Client Application] --> GraphQL[GraphQL API Gateway]
+    
+    %% GraphQL to Protocol Connections
+    GraphQL --> HTTP[HTTP/REST]
+    GraphQL --> gRPC[gRPC Protocol]
+    GraphQL --> Message[Message Queue]
+    GraphQL --> DB[Database Direct]
+    
+    %% Protocol to Microservices Connections
+    HTTP --> Service1[User Service]
+    gRPC --> Service2[Product Service]
+    Message --> Service3[Order Service]
+    DB --> Service4[Inventory Service]
+    
+    %% Microservices to Data Stores
+    Service1 --> DB1[(User Database)]
+    Service2 --> DB2[(Product Database)]
+    Service3 --> DB3[(Order Database)]
+    Service4 --> DB4[(Inventory Database)]
+    
+    %% Styling
+    classDef graphqlStyle fill:#e535ab,color:white
+    classDef protocolStyle fill:#007ec6,color:white
+    classDef serviceStyle fill:#00a950,color:white
+    classDef dbStyle fill:#ff6b35,color:white
+    
+    class GraphQL graphqlStyle
+    class HTTP,Message,gRPC,DB protocolStyle
+    class Service1,Service2,Service3,Service4 serviceStyle
+    class DB1,DB2,DB3,DB4 dbStyle
 ```
 
-#  **Kesimpulan **
+# **Kesimpulan **
 
 * GraphQL **bukan protokol IPC**, tetapi **memanfaatkan IPC** (REST/gRPC/MQ) untuk mengambil data.
 * GraphQL bertindak sebagai **layer penghubung** antara klien dan berbagai proses/microservice.
